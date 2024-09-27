@@ -1,26 +1,46 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { MercadoPagoConfig, Preference } from 'mercadopago';
 
 @Injectable()
-export class PaymentsService {
-  create(createPaymentDto: CreatePaymentDto) {
-    return 'This action adds a new payment';
+export class PaymentService {
+  private mercadoPagoClient: MercadoPagoConfig;
+
+  constructor() {
+    // Crear una instancia de MercadoPagoConfig con el access token desde las variables de entorno
+    this.mercadoPagoClient = new MercadoPagoConfig({
+      accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
+    });
   }
 
-  findAll() {
-    return `This action returns all payments`;
-  }
+  async createPayment(cartItems: any[]) {
+    // Mapear los items del carrito a la estructura que Mercado Pago necesita
+    const items = cartItems.map((item) => ({
+      id: item.id,
+      title: item.name,
+      unit_price: item.price,
+      quantity: item.quantity,
+      currency_id: 'ARS', // Puedes hacer esto dinámico si es necesario
+    }));
 
-  findOne(id: number) {
-    return `This action returns a #${id} payment`;
-  }
+    // Crear la preferencia de pago con los items del carrito y las URLs de retorno dinámicas
+    const preference = new Preference(this.mercadoPagoClient);
+    const body = {
+      items: items,
+      back_urls: {
+        success: `${process.env.FRONTEND_URL}/success`,
+        failure: `${process.env.FRONTEND_URL}/failure`,
+        pending: `${process.env.FRONTEND_URL}/pending`,
+      },
+      auto_return: 'approved',
+    };
 
-  update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    return `This action updates a #${id} payment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} payment`;
+    try {
+      // Crear la preferencia de pago en Mercado Pago
+      const result = await preference.create({ body });
+      return result; // Retornar el ID de la preferencia creada
+    } catch (error) {
+      // Manejo de errores en caso de fallo
+      throw new Error('Error al crear el pago con Mercado Pago');
+    }
   }
 }

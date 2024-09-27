@@ -1,0 +1,6 @@
+{
+    "cursor.chat.alwaysSearchWeb": true,
+    "cursor.chat.defaultNoContext": false,
+    "cursor.preferNotificationsSameAsChat": true,
+    "cursor.chat.smoothStreaming": true
+}

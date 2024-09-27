@@ -56,6 +56,6 @@ async function bootstrap() {
 
   //app.use(auth(auth0Config));// ya crea los endpoints necesarios automágicamente
   app.enableCors();
-  await app.listen(3002);
+  await app.listen(3003);
 }
 bootstrap();

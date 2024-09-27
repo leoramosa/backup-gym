@@ -1,0 +1,12 @@
+  if (account?.provider === "google") {
+        try {
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/auth/signin-provider`,
+            {
+              provider: account.provider,
+              providerId: account.id || profile.sub,
+              email: profile.email,
+              name: profile.given_name,
+              lastName: profile.family_name,
+            }
+          );

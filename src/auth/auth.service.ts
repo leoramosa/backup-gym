@@ -39,6 +39,12 @@ export class AuthService {
       });
 
       if (!user) {
+        user = await this.userRepository.findOne({
+          where: { email: profile.email },
+        });
+      }
+
+      if (!user) {
         const fullName = profile.name || '';
         const nameParts = fullName.split(' ');
         const firstName = nameParts.shift() || ''; // Primer nombre
@@ -56,7 +62,7 @@ export class AuthService {
         await this.userRepository.save(user);
       } else {
         // Si el usuario ya existe, puedes actualizar su información si es necesario
-        user.name = profile.name;
+        // user.name = profile.name;
         await this.userRepository.save(user);
       }
 
@@ -77,7 +83,17 @@ export class AuthService {
 
     const token = this.jwtService.sign(userPayload);
 
-    return { success: 'User logged in successfully', token };
+    return {
+      success: 'User logged in successfully',
+      token,
+      userData: {
+        id: user.id,
+        name: user.name,
+        lastName: user.lastName,
+        birthDay: user.birthDay,
+        isAdmin: user.isAdmin,
+      },
+    };
   }
 
   verifyToken(token: string): boolean {
